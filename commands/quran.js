@@ -1,7 +1,8 @@
-const { SlashCommandBuilder } = require('discord.js');
-const { AudioPlayerStatus, joinVoiceChannel, createAudioPlayer, NoSubscriberBehavior, createAudioResource, VoiceConnectionStatus, getVoiceConnection, generateDependencyReport } = require('@discordjs/voice');
+const { SlashCommandBuilder, Constants } = require('discord.js');
+const { AudioPlayerStatus, createAudioPlayer, NoSubscriberBehavior, createAudioResource, getVoiceConnection } = require('@discordjs/voice');
 
 const axios = require('axios')
+
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('quran')
@@ -42,147 +43,109 @@ module.exports = {
                     { name: `Rewayat Qalon A'n Nafi' Men Tariq Abi Nasheet`, value: `Rewayat Qalon A'n Nafi' Men Tariq Abi Nasheet` },
                     { name: `Rewayat Rowis and Rawh A'n Yakoob Al Hadrami `, value: `Rewayat Rowis and Rawh A'n Yakoob Al Hadrami ` },
                 )
-        ),
-
-    async execute(interaction) {
-        // if statment to chek if the recived interaction is a type of inputs recived
-        interaction.guild.members.cache.filter(async (member) => {
-            // let userchannelID2 = ''
-            // let botCHannelIDd = ''
-            // if (!member.user.bot) userchannelID2 = member.voice.channel?.id
-            // if (member.user.bot) botCHannelIDd = member.voice.channel?.id
-
-            // if (botCHannelIDd !== userchannelID2) return
-            if (member.user.bot) return;
-            if (!member.voice.channel?.id) return
-
-
-            const channelID = member.voice.channel?.id
-            const guildID = member.voice.channel?.guildId
-            const voiceAdapterCreator = member.guild.voiceAdapterCreator
-            const player = createAudioPlayer({
-                behaviors: {
-                    noSubscriber: NoSubscriberBehavior.Pause,
-                },
-            });
-
-
-
-            const connection = joinVoiceChannel({
-                channelId: channelID,
-                guildId: guildID,
-                adapterCreator: voiceAdapterCreator,
-            })
-            // console.log(connection)
-            const subscription = connection.subscribe(player);
+        )
+    ,
 
 
 
 
-            // connection status (controller)
-            connection.on(VoiceConnectionStatus.Ready, () => {
-                console.log('The connection has entered the Ready state - ready to play audio!');
-            });
+    async execute({ client, interaction }) {
+        if (!interaction.member.voice.channelId) {
+            return interaction.reply('not in a channel.');
+        }
+        const connection = getVoiceConnection(interaction.member.voice.channel.guildId);
+        // console.log(connection?.state?.subscription?.player?._state?.status)
+        if (connection?.state?.subscription?.player?._state?.status == 'playing') return interaction.reply('there is already an audio playing rite  ');
+        if (connection?.state?.subscription?.player?._state?.status == 'paused') return interaction.reply('the player is paused you should stop the player first then play onther audio');
+        if (!connection || (connection.joinConfig.channelId != interaction.member.voice.channelId)) {
+            return interaction.reply('The bot is not in this channel write "/join to call the bot" ');
+        }
 
-            connection.on(VoiceConnectionStatus.Disconnected, async (oldState, newState) => {
-                try {
-                    await Promise.race([
-                        entersState(connection, VoiceConnectionStatus.Signalling, 5_000),
-                        entersState(connection, VoiceConnectionStatus.Connecting, 5_000),
-                    ]);
-                    // Seems to be reconnecting to a new channel - ignore disconnect
-                } catch (error) {
-                    // Seems to be a real disconnect which SHOULDN'T be recovered from
-                    connection.destroy();
-                }
-            });
-
-
-            //player controller
-            player.on('error', error => {
-                console.error(error);
-            });
-            player.on(AudioPlayerStatus.Playing, () => {
-                console.log('The audio player has started playing!');
-
-                console.log(subscription?.player?._state.status)
-            });
-
-            player.on(AudioPlayerStatus.Idle, () => {
-                // player.play(getNextResource());
-                console.log('I stoped playing the audio')
-
-                console.log(subscription?.player?._state.status)
-            });
+        const player = createAudioPlayer({
+            behaviors: {
+                noSubscriber: NoSubscriberBehavior.Pause,
+            },
+        });
 
 
 
+        connection.subscribe(player);
 
-            // handeling the inputs
-            let swrahInput = ''
-            let readderInput = ''
-            let rewayahInput = ''
-            interaction.options._hoistedOptions.map((inputs) => {
-                inputs.name == 'surah' ? swrahInput = inputs.value.toLowerCase().replace(' ', '') : ''
-                inputs.name == 'reader' ? readderInput = inputs.value.toLowerCase() : ''
-                inputs.name == 'rewayah' ? rewayahInput = inputs?.value?.toLowerCase() : ''
-            })
+        let swrahInput = ''
+        let readderInput = ''
+        let rewayahInput = ''
 
-
-            await axios.get('https://mp3quran.net/api/v3/suwar?language=eng').then((res) => {
-                return res.data.suwar.map((swar) => {
-                    // console.log(swar?.name?.toLowerCase().replace(' ', '') == swrahInput)
-                    if (swar?.name?.toLowerCase().replace(' ', '') == swrahInput) {
-                        return swar
-                    }
-
-                })
-            }).then(async (res) => {
-
-                res.map(async (recivedSurah) => {
-                    if (recivedSurah) {
-                        await axios.get('https://www.mp3quran.net/api/v3/reciters?language=eng').then((readerd) => {
-                            return readerd.data.reciters.map((reader) => {
-
-
-                                if (reader.name.toLowerCase() == readderInput) {
-                                    return reader
-                                }
-                            })
-                        }).then((recivedReader) => {
-                            recivedReader.map((reader) => {
-                                if (reader) {
-                                    let surahURl = ''
-
-                                    if (`${recivedSurah.id}`.length == 1) surahURl = '00' + `${recivedSurah.id}`
-                                    if (`${recivedSurah.id}`.length == 2) surahURl = '0' + `${recivedSurah.id}`
-                                    if (`${recivedSurah.id}`.length == 3) surahURl = `${recivedSurah.id}`
-                                    console.log(`${reader.moshaf[0].server}${surahURl}.mp3`)
-                                    // console.log(' recived ID ' + ':' + ' ' + recivedSurah.id)
-
-                                    const resource = createAudioResource(`${reader.moshaf[0].server}${surahURl}.mp3`);
-                                    // if (play.player['_events']['idle']) return;
-                                    player.play(resource)
-
-
-
-                                }
-                            })
-
-                        })
-                    }
-                })
-            })
-
-
-
-
-
+        interaction.options._hoistedOptions.map((inputs) => {
+            inputs.name == 'surah' ? swrahInput = inputs.value.toLowerCase().replace(' ', '') : ''
+            inputs.name == 'reader' ? readderInput = inputs.value.toLowerCase() : ''
+            inputs.name == 'rewayah' ? rewayahInput = inputs?.value?.toLowerCase() : ''
         })
 
 
+        await axios.get('https://mp3quran.net/api/v3/suwar?language=eng').then((res) => {
+            return res.data.suwar.map((swar) => {
+
+                // console.log(swar)
+                // console.log(swar?.name?.toLowerCase().replace(' ', '') == swrahInput)
+                if (swar?.name?.toLowerCase().replace(' ', '') == swrahInput) {
+                    return swar
+                }
+
+            })
+        }).then(async (res) => {
+
+            res.map(async (recivedSurah) => {
+                if (recivedSurah) {
+                    await axios.get('https://www.mp3quran.net/api/v3/reciters?language=eng').then((readerd) => {
+                        return readerd.data.reciters.map((reader) => {
 
 
-        await interaction.reply('replying a resbon message to the user');
+                            if (reader.name.toLowerCase() == readderInput) {
+                                return reader
+                            }
+                        })
+                    }).then((recivedReader) => {
+                        recivedReader.map((reader) => {
+                            if (reader) {
+                                let surahURl = ''
+                                if (`${recivedSurah.id}`.length == 1) surahURl = '00' + `${recivedSurah.id}`
+                                if (`${recivedSurah.id}`.length == 2) surahURl = '0' + `${recivedSurah.id}`
+                                if (`${recivedSurah.id}`.length == 3) surahURl = `${recivedSurah.id}`
+                                console.log(`${reader.moshaf[0].server}${surahURl}.mp3`)
+                                // console.log(' recived ID ' + ':' + ' ' + recivedSurah.id)
+
+                                const resource = createAudioResource(`${reader.moshaf[0].server}${surahURl}.mp3`);
+                                // if (play.player['_events']['idle']) return;
+                                // if (player?._state?.resource?.playStream) return console.log('bot already si playing an audio')
+
+                                player.play(resource)
+
+
+
+                            }
+                        })
+
+                    })
+                }
+            })
+
+            player.on('error', error => {
+                console.error(error);
+            });
+            player.on(AudioPlayerStatus.Playing, async () => {
+                console.log('The audio player has started playing!');
+                return await interaction.reply(`playing ${swrahInput}...`);
+            });
+
+            player.on(AudioPlayerStatus.Idle, async () => {
+                // player.play(getNextResource());
+
+                console.log('audio is finished')
+                console.log(connection?.state?.subscription?.player?._state?.status)
+
+
+
+            });
+        })
     },
 };

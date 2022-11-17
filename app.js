@@ -16,8 +16,7 @@ const fs = require("fs")
 const path = require('node:path');
 
 const token = process.env.TOKEN
-const clientId = '1039897746125107221'
-const guildId = "822529784583815178"
+const clientId = '1040712085270696048'
 
 
 //command code
@@ -31,6 +30,7 @@ const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('
 for (const file of commandFiles) {
 
     const filePath = path.join(commandsPath, file);
+
     const command = require(filePath);
 
     commands.push(command.data.toJSON());
@@ -76,7 +76,7 @@ client.on(Events.InteractionCreate, async interaction => {
     }
 
     try {
-        await command.execute(interaction);
+        await command.execute({ client, interaction });
     } catch (error) {
         console.error(error);
         await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
