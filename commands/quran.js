@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, Constants } = require('discord.js');
+const { SlashCommandBuilder, Constants, permissionsIn, PermissionsBitField } = require('discord.js');
 const { AudioPlayerStatus, createAudioPlayer, NoSubscriberBehavior, createAudioResource, getVoiceConnection } = require('@discordjs/voice');
 
 const axios = require('axios')
@@ -51,7 +51,10 @@ module.exports = {
 
     async execute({ client, interaction }) {
         if (!interaction.member.voice.channelId) {
-            return interaction.reply('not in a channel.');
+            return await interaction.reply('not in a channel.');
+        }
+        if (!interaction.guild.members.me.permissionsIn(interaction.member.voice.channel).has(PermissionsBitField.Flags.Speak)) {
+            return await interaction.reply("I don't have permissions to speak this channel channels plz give a permission first (if you gave me the grean light to speak in the channel and it is still shows that I'm muted write /leave then /join again)");
         }
         const connection = getVoiceConnection(interaction.member.voice.channel.guildId);
         // console.log(connection?.state?.subscription?.player?._state?.status)

@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, Collection } = require('discord.js');
+const { SlashCommandBuilder, Collection, PermissionsBitField, permissionsIn } = require('discord.js');
 const { joinVoiceChannel, VoiceConnectionStatus, getVoiceConnection, entersState } = require('@discordjs/voice');
 const delay = new Collection()
 const ms = require('ms')
@@ -14,7 +14,9 @@ module.exports = {
         // }
 
 
-        //connection handeler
+        if (!interaction.guild.members.me.permissionsIn(interaction.member.voice.channel).has(PermissionsBitField.Flags.Connect) || !interaction.guild.members.me.permissionsIn(interaction.member.voice.channel).has(PermissionsBitField.Flags.ViewChannel)) {
+            return interaction.reply("I don't have a permissions to join or view this channel  plz give a permissions first ( I need to be abel to view and connect to the channel in order to join)");
+        }
         if (interaction.member.user.bot) return
         // console.log(member)
         const channelID = interaction.member.voice.channel?.id
