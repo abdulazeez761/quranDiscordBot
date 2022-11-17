@@ -8,24 +8,31 @@ module.exports = {
         .setName('readers')
         .setDescription('Provides information about the server.'),
     async execute({ client, interaction }) {
-        // if (!interaction.guild.members.me.permissions.has(PermissionsBitField.Flags.Administrator)) return interaction.reply('you dont have an acces to create a file ')
 
-        const data = await axios.get('https://www.mp3quran.net/api/v3/reciters?language=eng').then((readerd) => {
-            return readerd.data.reciters.map((reader) => {
-                // console.log(reader.name + ':' + ' ' + reader.moshaf[0].name)
-                return `${reader.id} ${reader.name}`
-                // return {
-                //     "reader": reader.name
-                // } 
-            })
-        })
+        // let Count = 0;
+        // let data = await axios.get('https://www.mp3quran.net/api/v3/reciters?language=eng').then((readerd) => {
+        //     return readerd.data.reciters.map((reader) => {
+        //         // console.log(reader.name + ':' + ' ' + reader.moshaf[0].name)
+        //         // data.push(`${reader.id} ${reader.name}`)
+        //         console.log(
+        //             {
+        //                 "number": ++Count,
+        //                 "name": reader.name
+        //             }
+        //         )
 
-        fs.writeFileSync(`readers`, JSON.stringify(data));
+        //     })
+        // })
+
+
+
         await interaction.reply({
+            content: `readers :`,
             files: [{
-                attachment: path.join(__dirname, '../' + 'readers'),
-                name: 'readers.json'
-            }], ephemeral: true
+                attachment: path.join(__dirname, '../' + 'readers.html'),
+                name: 'reader.abnf'
+            }],
+            ephemeral: true
         });
     },
 };
