@@ -1,8 +1,10 @@
 const { SlashCommandBuilder, Constants, permissionsIn, PermissionsBitField } = require('discord.js');
 const { AudioPlayerStatus, createAudioPlayer, NoSubscriberBehavior, createAudioResource, getVoiceConnection } = require('@discordjs/voice');
-
+const config = require('config');
 const axios = require('axios')
+const loop = require('./lopp')
 
+let info = require('../info.json')
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('quran')
@@ -50,6 +52,7 @@ module.exports = {
 
 
     async execute({ client, interaction }) {
+
         if (!interaction.member.voice.channelId) {
             return await interaction.reply('not in a channel.');
         }
@@ -72,7 +75,12 @@ module.exports = {
 
 
 
-        connection.subscribe(player);
+        const subscribe = connection.subscribe(player);
+        // console.log(subscribe)
+        // subscribe.unsubscribe()
+        // setTimeout(() => {
+        //     console.log(subscribe)
+        // }, 2000)
 
         let swrahInput = ''
         let readderInput = ''
@@ -88,24 +96,23 @@ module.exports = {
         await axios.get('https://mp3quran.net/api/v3/suwar?language=eng').then((res) => {
             return res.data.suwar.map((swar) => {
 
-                // console.log(swar)
-                // console.log(swar?.name?.toLowerCase().replace(' ', '') == swrahInput)
                 if (swar?.name?.toLowerCase().replace(' ', '') == swrahInput) {
                     return swar
                 }
-
+                // return interaction.editReply({ content: `swar field does not match any of the swar write /swar to get all of the swar `, ephemeral: true });
+                // return console.log('the name of the surah doesnt match')
             })
         }).then(async (res) => {
-
             res.map(async (recivedSurah) => {
                 if (recivedSurah) {
                     await axios.get('https://www.mp3quran.net/api/v3/reciters?language=eng').then((readerd) => {
                         return readerd.data.reciters.map((reader) => {
-
-
-                            if (reader.name.toLowerCase() == readderInput) {
+                            if (reader?.name?.toLowerCase() == readderInput) {
                                 return reader
                             }
+                            // return interaction.reply({ content: `reader field does not match any of the readers write /readers to get all of the readers`, ephemeral: true });
+
+                            // return console.log('the name of the reader doesnt match')
                         })
                     }).then((recivedReader) => {
                         recivedReader.map((reader) => {
@@ -117,10 +124,14 @@ module.exports = {
                                 console.log(`${reader.moshaf[0].server}${surahURl}.mp3`)
                                 // console.log(' recived ID ' + ':' + ' ' + recivedSurah.id)
 
-                                const resource = createAudioResource(`${reader.moshaf[0].server}${surahURl}.mp3`);
-                                // if (play.player['_events']['idle']) return;
-                                // if (player?._state?.resource?.playStream) return console.log('bot already si playing an audio')
+                                const resource = createAudioResource(`${reader.moshaf[0].server}${surahURl}.mp3`, { inlineVolume: true });
 
+                                info.resorce.name = `${reader.moshaf[0].server}${surahURl}.mp3`
+                                // loop.execute({
+                                //     client, interaction, resource: {
+                                //         data: `${reader.moshaf[0].server}${surahURl}.mp3`
+                                //     }
+                                // })
                                 player.play(resource)
 
 
@@ -136,19 +147,16 @@ module.exports = {
                 console.error(error);
             });
             player.on(AudioPlayerStatus.Playing, async () => {
+
                 console.log('The audio player has started playing!');
-                return await interaction.reply(`playing ${swrahInput}...`);
+                // return await interaction.reply({ content: `playing ${swrahInput}...`, ephemeral: true });
             });
 
             player.on(AudioPlayerStatus.Idle, async () => {
-                // player.play(getNextResource());
-
-                console.log('audio is finished')
-                console.log(connection?.state?.subscription?.player?._state?.status)
-
-
-
+                if (info.resorce.loop !== true) return //if the loop is on
+                await player.play(createAudioResource(info.resorce.name))
             });
         })
+
     },
 };

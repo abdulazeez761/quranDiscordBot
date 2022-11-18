@@ -7,14 +7,14 @@ module.exports = {
         .setDescription('Provides information about the server.'),
     async execute({ client, interaction }) {
         if (!interaction.member.voice.channelId) {
-            return interaction.reply('not in a channel.');
+            return interaction.reply({ content: 'not in a channel.', ephemeral: true });
         }
         const connection = getVoiceConnection(interaction.member.voice.channel.guildId);
         if (!connection || (connection.joinConfig.channelId != interaction.member.voice.channelId)) {
-            return interaction.reply('The bot is not in this channel.');
+            return interaction.reply({ content: 'The bot is not in this channel.', ephemeral: true });
         }
         // connection.state.subscription.player.stop();
         connection.destroy()
-        await interaction.reply('left');
+        await interaction.reply({ content: 'left', ephemeral: true });
     },
 };

@@ -1,10 +1,9 @@
 const { SlashCommandBuilder } = require('discord.js');
 const { getVoiceConnection } = require('@discordjs/voice');
 const player = require('./quran')
-let info = require('../info.json')
 module.exports = {
     data: new SlashCommandBuilder()
-        .setName('stop')
+        .setName('volume')
         .setDescription('Provides information about the server.'),
     async execute({ client, interaction }) {
         // player.execute({ client, interaction })
@@ -21,18 +20,18 @@ module.exports = {
 
         let player = connection?.state?.subscription?.player
         // sending an api data to the discord api with a idle audio player wich meanes the player has no audio to play
-        let state = player._state
-        player._state = {
-            ...state,
-            status: 'Idle'
-        }
+        let resource = player?._state?.resource.volume
+
+        // console.log(resource.volume.volume)
 
 
-        info.resorce.loop = false
+        // player._state.resource.volume = {
+        //     ...resource,
+        //     volume: 0.3
+        // }
+        // console.log(resource.volume)
 
-
-
-        return await interaction.reply('stoped');
+        // return await interaction.reply({content:"voluem is ..."});
 
     },
 };

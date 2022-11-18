@@ -8,11 +8,16 @@ module.exports = {
         .setName('swar')
         .setDescription('Provides information about the server.'),
     async execute({ client, interaction }) {
+        // axios.get('https://mp3quran.net/api/v3/suwar?language=ar').then((res) => {
+        //     res.data.suwar.map((arSwar) => {
+        //         console.log(`${arSwar.name}`)
+        //     })
+        // })
         await interaction.reply({
             content: `swar :`,
             files: [{
-                attachment: path.join(__dirname, '../' + 'swar.html'),
-                name: 'swar.abnf'
+                attachment: path.join(__dirname, '../' + 'swar.txt'),
+                name: 'suwar.abnf'
             }],
             ephemeral: true
         });

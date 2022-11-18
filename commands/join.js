@@ -14,9 +14,7 @@ module.exports = {
         // }
 
 
-        if (!interaction.guild.members.me.permissionsIn(interaction.member.voice.channel).has(PermissionsBitField.Flags.Connect) || !interaction.guild.members.me.permissionsIn(interaction.member.voice.channel).has(PermissionsBitField.Flags.ViewChannel)) {
-            return interaction.reply("I don't have a permissions to join or view this channel  plz give a permissions first ( I need to be abel to view and connect to the channel in order to join)");
-        }
+
         if (interaction.member.user.bot) return
         // console.log(member)
         const channelID = interaction.member.voice.channel?.id
@@ -25,6 +23,9 @@ module.exports = {
         if (!channelID) return await interaction.reply('your not in a channel');
         const connection = getVoiceConnection(interaction.member.voice.channel.guildId); // I'm cheking if there is a connection
         if (connection) return await interaction.reply('the bot is already connected');
+        if (!interaction.guild.members.me.permissionsIn(interaction.member.voice.channel).has(PermissionsBitField.Flags.Connect) || !interaction.guild.members.me.permissionsIn(interaction.member.voice.channel).has(PermissionsBitField.Flags.ViewChannel)) {
+            return interaction.reply("I don't have a permissions to join or view this channel  plz give a permissions first ( I need to be abel to view and connect to the channel in order to join)");
+        }
         if (!connection) {
             const connection = joinVoiceChannel({
                 channelId: channelID,
@@ -35,7 +36,7 @@ module.exports = {
             // connection status (controller)
             connection.on(VoiceConnectionStatus.Ready, async () => {
                 // console.log('The connection has entered the Ready state - ready to play audio!');
-                return await interaction.reply('connected');
+                return await interaction.reply({ content: 'connected', ephemeral: true });
             });
 
             connection.on(VoiceConnectionStatus.Disconnected, async (oldState, newState) => {
