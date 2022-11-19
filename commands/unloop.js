@@ -2,10 +2,10 @@ const { SlashCommandBuilder } = require('discord.js');
 const { getVoiceConnection, AudioPlayerStatus, createAudioResource } = require('@discordjs/voice');
 let info = require('../info.json')
 
-const quranFunction = require('./quran')
+
 module.exports = {
     data: new SlashCommandBuilder()
-        .setName('loop')
+        .setName('unloop')
         .setDescription('Provides information about the server.'),
     async execute({ client, interaction, resource }) {
 
@@ -19,9 +19,8 @@ module.exports = {
         if (!connection?.state?.subscription?.player) {
             return await interaction.reply('bot is not playing anything ');
         }
-        if (info.resorce.loop == true) return interaction.reply({ content: "the audio is alreadey  looping", ephemeral: true })
-
-        info.resorce.loop = true
-        await interaction.reply({ content: "✅ lopping has been started", ephemeral: true })
+        if (info.resorce.loop == false) return interaction.reply({ content: "the audio is alreadey not looping", ephemeral: true })
+        info.resorce.loop = false
+        await interaction.reply({ content: "✅ lopping has been canseld", ephemeral: true })
     },
 };
