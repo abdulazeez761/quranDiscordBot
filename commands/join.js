@@ -6,7 +6,7 @@ module.exports = {
     cooldown: 3,
     data: new SlashCommandBuilder()
         .setName('join')
-        .setDescription('Provides information about the user.'),
+        .setDescription('you must call it to make the bot join the channel then you can use the rest of the commands '),
     async execute({ client, interaction }) {
         // const commanad = client.commands.get(interaction.commandName)
         // if (commanad.cooldown) {
@@ -53,11 +53,7 @@ module.exports = {
                     connection.destroy();
                 }
             });
-            // delay.set(`${commanad.data.name}-${interaction.user.id}`, Date.now() + (commanad.cooldown * 1000))
 
-            // setTimeout(() => {
-            //     delay.delete(`${commanad.data.name}-${interaction.user.id}`)
-            // }, commanad.cooldown * 1000)
         }
 
     },

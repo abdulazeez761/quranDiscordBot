@@ -7,7 +7,7 @@ const { count } = require('console');
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('readers')
-        .setDescription('Provides information about the server.'),
+        .setDescription('to see all of the available readers with how many swar they have recorded'),
     async execute({ client, interaction }) {
 
 

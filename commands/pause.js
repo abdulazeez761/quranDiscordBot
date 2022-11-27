@@ -4,7 +4,7 @@ const { getVoiceConnection } = require('@discordjs/voice');
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('pause')
-        .setDescription('Provides information about the server.'),
+        .setDescription('to pause the audio'),
     async execute({ client, interaction }) {
         const connection = getVoiceConnection(interaction.member.voice.channel.guildId);
 
@@ -30,6 +30,6 @@ module.exports = {
             status: 'paused'
         }
 
-        return await interaction.reply('paused');
+        return await interaction.reply({ content: 'paused', ephemeral: true });
     },
 };

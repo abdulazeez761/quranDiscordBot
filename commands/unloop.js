@@ -6,7 +6,7 @@ let info = require('../info.json')
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('unloop')
-        .setDescription('Provides information about the server.'),
+        .setDescription('to unloop over the audio'),
     async execute({ client, interaction, resource }) {
 
         if (!interaction.member.voice.channelId) {

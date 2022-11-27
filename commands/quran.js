@@ -1,5 +1,5 @@
 const { SlashCommandBuilder, Constants, permissionsIn, PermissionsBitField } = require('discord.js');
-const { AudioPlayerStatus, createAudioPlayer, NoSubscriberBehavior, createAudioResource, getVoiceConnection } = require('@discordjs/voice');
+const { AudioPlayerStatus, createAudioPlayer, NoSubscriberBehavior, createAudioResource, getVoiceConnection, getNextResource } = require('@discordjs/voice');
 const config = require('config');
 const axios = require('axios')
 const loop = require('./lopp')
@@ -11,41 +11,17 @@ module.exports = {
         .setDescription('playing quran')
         .addStringOption(option =>
             option.setName('surah')
-                .setDescription('The input to echo back')
+                .setDescription('write the name of the surah here ')
                 .setRequired(true)
                 .setAutocomplete(true)
         )
         .addStringOption(option =>
             option.setName('reader')
-                .setDescription('The input to echo back')
+                .setDescription('write the name of the reader here ')
                 .setRequired(true)
                 .setAutocomplete(true)
         )
-        .addStringOption((option) =>
-            option.setName('rewayah')
-                .setDescription('The input to echo back')
-                .setRequired(false)
-                // add rewayah options
-                .addChoices(
-                    { name: `Rewayat Hafs A'n Assem`, value: `Rewayat Hafs A'n Assem` },
-                    { name: `Rewayat Warsh A'n Nafi' Men  Tariq Abi Baker Alasbahani`, value: `Rewayat Warsh A'n Nafi' Men  Tariq Abi Baker Alasbahani` },
-                    { name: `Rewayat Albizi and Qunbol A'n Ibn Katheer`, value: `Rewayat Albizi and Qunbol A'n Ibn Katheer` },
-                    { name: `Rewayat AlDorai A'n Al-Kisa'ai`, value: `Rewayat AlDorai A'n Al-Kisa'ai` },
-                    { name: `Rewayat Aldori A'n Abi Amr`, value: `Rewayat Aldori A'n Abi Amr` },
-                    { name: `Sho'bah A'n Asim`, value: `Sho'bah A'n Asim` },
-                    { name: `Rewayat Albizi A'n Ibn Katheer`, value: `Rewayat Albizi A'n Ibn Katheer` },
-                    { name: `Ibn Thakwan A'n Ibn Amer`, value: `Ibn Thakwan A'n Ibn Amer` },
-                    { name: `Rewayat Warsh A'n Nafi' Men Tariq Alazraq`, value: `Rewayat Warsh A'n Nafi' Men Tariq Alazraq` },
-                    { name: `Rewayat Warsh A'n Nafi'`, value: `Rewayat Warsh A'n Nafi'` },
-                    { name: `Rewayat Khalaf A'n Hamzah`, value: `Rewayat Khalaf A'n Hamzah` },
-                    { name: `Almusshaf Al Mo'lim`, value: `Almusshaf Al Mo'lim` },
-                    { name: `ewayat Qalon A'n Nafi'`, value: `ewayat Qalon A'n Nafi'` },
-                    { name: `Almusshaf Al Mojawwad`, value: `Almusshaf Al Mojawwad` },
-                    { name: `Rewayat Assosi A'n Abi Amr`, value: `Rewayat Assosi A'n Abi Amr` },
-                    { name: `Rewayat Qalon A'n Nafi' Men Tariq Abi Nasheet`, value: `Rewayat Qalon A'n Nafi' Men Tariq Abi Nasheet` },
-                    { name: `Rewayat Rowis and Rawh A'n Yakoob Al Hadrami `, value: `Rewayat Rowis and Rawh A'n Yakoob Al Hadrami ` },
-                )
-        )
+
     ,
 
 
@@ -76,11 +52,6 @@ module.exports = {
 
 
         const subscribe = connection.subscribe(player);
-        // console.log(subscribe)
-        // subscribe.unsubscribe()
-        // setTimeout(() => {
-        //     console.log(subscribe)
-        // }, 2000)
 
         let swrahInput = ''
         let readderInput = ''
@@ -110,9 +81,7 @@ module.exports = {
                             if (reader?.name?.toLowerCase() == readderInput) {
                                 return reader
                             }
-                            // return interaction.reply({ content: `reader field does not match any of the readers write /readers to get all of the readers`, ephemeral: true });
 
-                            // return console.log('the name of the reader doesnt match')
                         })
                     }).then((recivedReader) => {
                         recivedReader.map((reader) => {
@@ -121,21 +90,11 @@ module.exports = {
                                 if (`${recivedSurah.id}`.length == 1) surahURl = '00' + `${recivedSurah.id}`
                                 if (`${recivedSurah.id}`.length == 2) surahURl = '0' + `${recivedSurah.id}`
                                 if (`${recivedSurah.id}`.length == 3) surahURl = `${recivedSurah.id}`
-                                console.log(`${reader.moshaf[0].server}${surahURl}.mp3`)
-                                // console.log(' recived ID ' + ':' + ' ' + recivedSurah.id)
 
                                 const resource = createAudioResource(`${reader.moshaf[0].server}${surahURl}.mp3`, { inlineVolume: true });
-
                                 info.resorce.name = `${reader.moshaf[0].server}${surahURl}.mp3`
-                                // loop.execute({
-                                //     client, interaction, resource: {
-                                //         data: `${reader.moshaf[0].server}${surahURl}.mp3`
-                                //     }
-                                // })
+
                                 player.play(resource)
-
-
-
                             }
                         })
 
@@ -153,8 +112,10 @@ module.exports = {
             });
 
             player.on(AudioPlayerStatus.Idle, async () => {
-                if (info.resorce.loop !== true) return //if the loop is on
+
+                if (info.resorce.loop !== true) return //if the loop is not on
                 await player.play(createAudioResource(info.resorce.name))
+
             });
         })
 

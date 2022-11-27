@@ -4,7 +4,7 @@ const player = require('./quran')
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('leave')
-        .setDescription('Provides information about the server.'),
+        .setDescription('this command makse the bot leave the channel then you can use him in another channels'),
     async execute({ client, interaction }) {
         if (!interaction.member.voice.channelId) {
             return interaction.reply({ content: 'not in a channel.', ephemeral: true });

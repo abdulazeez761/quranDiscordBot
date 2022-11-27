@@ -6,7 +6,7 @@ const quranFunction = require('./quran')
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('loop')
-        .setDescription('Provides information about the server.'),
+        .setDescription('to loop over the aoduio'),
     async execute({ client, interaction, resource }) {
 
         if (!interaction.member.voice.channelId) {

@@ -5,14 +5,10 @@ const axios = require('axios')
 const path = require('node:path');
 module.exports = {
     data: new SlashCommandBuilder()
-        .setName('swar')
-        .setDescription('Provides information about the server.'),
+        .setName('suwar')
+        .setDescription('to see all of the swar'),
     async execute({ client, interaction }) {
-        // axios.get('https://mp3quran.net/api/v3/suwar?language=ar').then((res) => {
-        //     res.data.suwar.map((arSwar) => {
-        //         console.log(`${arSwar.name}`)
-        //     })
-        // })
+
         await interaction.reply({
             content: `swar :`,
             files: [{

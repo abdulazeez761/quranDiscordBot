@@ -4,7 +4,7 @@ const wait = require('timers/promises').setTimeout;
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('unpause')
-        .setDescription('Provides information about the server.'),
+        .setDescription('to resume the audio'),
     async execute({ client, interaction }) {
         const connection = getVoiceConnection(interaction.member.voice.channel.guildId);
 
@@ -28,7 +28,7 @@ module.exports = {
             status: 'playing'
         }
 
-        return await interaction.reply('unpaused');
+        return await interaction.reply({ content: 'unpaused', ephemeral: true });
 
     },
 };

@@ -5,7 +5,7 @@ let info = require('../info.json')
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('stop')
-        .setDescription('Provides information about the server.'),
+        .setDescription('to stop the bot playing the audio'),
     async execute({ client, interaction }) {
         // player.execute({ client, interaction })
         if (!interaction.member.voice.channelId) {
@@ -32,7 +32,7 @@ module.exports = {
 
 
 
-        return await interaction.reply('stoped');
+        return await interaction.reply({ content: 'stoped', ephemeral: true });
 
     },
 };
