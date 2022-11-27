@@ -2,8 +2,6 @@ const { SlashCommandBuilder, Constants, permissionsIn, PermissionsBitField } = r
 const { AudioPlayerStatus, createAudioPlayer, NoSubscriberBehavior, createAudioResource, getVoiceConnection, getNextResource } = require('@discordjs/voice');
 const config = require('config');
 const axios = require('axios')
-const loop = require('./lopp')
-
 let info = require('../info.json')
 module.exports = {
     data: new SlashCommandBuilder()
@@ -35,7 +33,7 @@ module.exports = {
         if (!interaction.guild.members.me.permissionsIn(interaction.member.voice.channel).has(PermissionsBitField.Flags.Speak)) {
             return await interaction.reply("I don't have permissions to speak this channel channels plz give a permission first (if you gave me the grean light to speak in the channel and it is still shows that I'm muted write /leave then /join again)");
         }
-        const connection = getVoiceConnection(interaction.member.voice.channel.guildId);
+        let connection = getVoiceConnection(interaction.member.voice.channel.guildId);
         // console.log(connection?.state?.subscription?.player?._state?.status)
         if (connection?.state?.subscription?.player?._state?.status == 'playing') return interaction.reply('there is already an audio playing rite  ');
         if (connection?.state?.subscription?.player?._state?.status == 'paused') return interaction.reply('the player is paused you should stop the player first then play onther audio');
@@ -92,8 +90,11 @@ module.exports = {
                                 if (`${recivedSurah.id}`.length == 3) surahURl = `${recivedSurah.id}`
 
                                 const resource = createAudioResource(`${reader.moshaf[0].server}${surahURl}.mp3`, { inlineVolume: true });
-                                info.resorce.name = `${reader.moshaf[0].server}${surahURl}.mp3`
-
+                                connection.state = {
+                                    ...connection.state,
+                                    resource: `${reader.moshaf[0].server}${surahURl}.mp3`,
+                                    loop: false
+                                }
                                 player.play(resource)
                             }
                         })
@@ -113,8 +114,9 @@ module.exports = {
 
             player.on(AudioPlayerStatus.Idle, async () => {
 
-                if (info.resorce.loop !== true) return //if the loop is not on
-                await player.play(createAudioResource(info.resorce.name))
+                if (connection?.state?.loop !== true) return //if the loop is not on
+                await player.play(createAudioResource(connection?.state?.resource))
+
 
             });
         })

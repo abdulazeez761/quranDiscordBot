@@ -26,12 +26,10 @@ module.exports = {
             ...state,
             status: 'Idle'
         }
-
-
-        info.resorce.loop = false
-
-
-
+        connection.state = {
+            ...connection.state,
+            loop: false
+        }
         return await interaction.reply({ content: 'stoped', ephemeral: true });
 
     },

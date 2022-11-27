@@ -7,9 +7,6 @@ module.exports = {
         .setDescription('to pause the audio'),
     async execute({ client, interaction }) {
         const connection = getVoiceConnection(interaction.member.voice.channel.guildId);
-
-
-
         if (!interaction.member.voice.channelId) {
             return await interaction.reply('not in a channel.');
         }

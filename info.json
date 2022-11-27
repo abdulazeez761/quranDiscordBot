@@ -3,5 +3,10 @@
         "name": "",
         "loop": "",
         "queue": []
+    },
+    "loop": {
+        "status": "",
+        "server": "",
+        "resorce": ""
     }
 }
